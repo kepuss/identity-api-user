@@ -214,6 +214,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
+                <groupId>org.wso2.carbon.identity.ekyc</groupId>
+                <artifactId>org.wso2.carbon.identity.user.ekyc</artifactId>
+                <version>${carbon.identity.ekyc.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.wso2.carbon.identity.user.api</groupId>
                 <artifactId>org.wso2.carbon.identity.api.user.common</artifactId>
                 <scope>provided</scope>
@@ -431,6 +437,7 @@
         <identity.governance.version>1.4.28</identity.governance.version>
         <carbon.identity.framework.version>5.18.164</carbon.identity.framework.version>
         <carbon.identity.account.association.version>5.3.7</carbon.identity.account.association.version>
+        <carbon.identity.ekyc.version>1.0.0-SNAPSHOT</carbon.identity.ekyc.version>
         <maven.findbugsplugin.version>3.0.5</maven.findbugsplugin.version>
         <carbon.business-process.version>4.5.2</carbon.business-process.version>
         <identity.oauth.version>6.4.150</identity.oauth.version>
@@ -445,6 +452,7 @@
     <modules>
         <module>components/org.wso2.carbon.identity.api.user.common</module>
         <module>components/org.wso2.carbon.identity.api.user.association</module>
+        <module>components/org.wso2.carbon.identity.api.user.ekyc</module>
         <module>components/org.wso2.carbon.identity.api.user.challenge</module>
         <module>components/org.wso2.carbon.identity.api.user.authorized.apps</module>
         <module>components/org.wso2.carbon.identity.api.user.approval</module>

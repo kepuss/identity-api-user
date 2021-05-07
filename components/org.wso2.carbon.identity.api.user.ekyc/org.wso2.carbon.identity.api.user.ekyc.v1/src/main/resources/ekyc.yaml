@@ -1,0 +1,301 @@
+swagger: '2.0'
+######################################################
+# Prolog
+######################################################
+info:
+  description: |
+    This document specifies a **RESTful API** for WSO2 **Identity Server** .
+    It is written with [swagger 2](http://swagger.io/). The APIs provide the
+    capability to add/retrieve/delete ekyc claims of an authenticated user.
+
+  version: "v1"
+  title: "WSO2 Identity Server - User EKYC API Definition"
+  contact:
+    name: "WSO2"
+    url: "http://wso2.com/products/identity-server/"
+    email: "architecture@wso2.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+# Tags are used for organizing operations
+tags:
+  - name: me
+    description: Operations for the authenticated user.
+
+######################################################
+# The fixed parts of the URLs of the API
+######################################################
+
+# The schemes supported by the API
+schemes:
+  - https
+# Applicable authentication mechanisms.
+security:
+  - OAuth2: []
+  - BasicAuth: []
+
+
+# The domain of the API.
+# This is configured by the customer during deployment.
+# The given host is just an example.
+# host: apis.is.com
+
+# The base path of the API.
+# Will be prefixed to all paths.
+
+# if the tenant domain is carbon.super basepath can be /api/identity/user/v1.0 like this too.
+# basePath: /t/{tenant-domain}/api/identity/v1.0
+
+# The following media types can be passed as input in message bodies of the API.
+# The actual media type must be specified in the Content-Type header field of the request.
+# The default is json, i.e. the Content-Type header is not needed to
+# be set, but supporting it serves extensibility.
+consumes:
+  - application/json
+
+# The following media types may be passed as output in message bodies of the API.
+# The media type(s) consumable by the requestor is specified in the Accept header field
+# of the corresponding request.
+# The actual media type returned will be specfied in the Content-Type header field
+# of the of the response.
+# The default of the Accept header is json, i.e. there is not needed to
+# set the value, but supporting it serves extensibility.
+
+
+produces:
+  - application/json
+paths:
+  # Endpoint uses to associate two user accounts.
+  /me/ekyc/generate-session:
+    get:
+      description: |
+        This API is used to generate new session and redeirection url for EKYC process.<br>
+        <b>Permission required:</b>
+            * None
+        <b>Scope required:</b>
+            * internal_login
+      summary: |
+        Generate new EKYC session
+      responses:
+        200:
+          description: Successfully created
+          schema:
+             $ref: '#/definitions/EKYCSession'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+        403:
+          description: Resource Forbidden
+        409:
+          description: Conflict
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+        - me
+  /me/ekyc/vcs:
+    get:
+      tags:
+        - me
+      summary: Get user's verified credentials
+      description: |
+        This API is used to get user's verified credentials.<br>
+        <b>Permission required:</b>
+            * None
+        <b>Scope required:</b>
+            * internal_login
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: 'array'
+            items:
+              $ref: '#/definitions/EKYCVerifiedCredential'
+        401:
+          description: Unauthorized
+        403:
+          description: Resource Forbidden
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /me/ekyc/vc/check-pending:
+    post:
+      tags:
+        - me
+      summary: Check verified credential that is in pending state
+      description: |
+        This API is used to check verified credential that is in pending state.<br>
+        <b>Permission required:</b>
+            * None
+        <b>Scope required:</b>
+            * internal_login
+      parameters:
+        - in: body
+          name: challengeAnswer
+          description: One or more challenge(s) with the answer.
+          schema:
+             $ref: '#/definitions/EKYCPendingVerifiedCredential'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/EKYCVerifiedCredential'
+        401:
+          description: Unauthorized
+        403:
+          description: Resource Forbidden
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+  /me/ekyc/vc/{session-id}:
+    delete:
+      tags:
+        - me
+      summary: Delete verified credential
+      description: |
+        This API is used to delete verified credential.<br>
+        <b>Permission required:</b>
+            * None
+        <b>Scope required:</b>
+            * internal_login
+      parameters:
+        - in: path
+          name: session-id
+          type: string
+          required: true
+          description: Verified credential session id
+      responses:
+        200:
+          description: Successful operation
+        401:
+          description: Unauthorized
+        403:
+          description: Resource Forbidden
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+  /me/ekyc/vc/update-claims:
+    post:
+      tags:
+        - me
+      summary: Update user claims with claims from verified credential.
+      description: |
+        This API is used to update user claims with claims from verified credential.<br>
+        <b>Permission required:</b>
+            * None
+        <b>Scope required:</b>
+            * internal_login
+      parameters:
+        - in: body
+          name: challengeAnswer
+          description: One or more challenge(s) with the answer.
+          schema:
+             $ref: '#/definitions/EKYCUpdateClaims'
+      responses:
+        200:
+          description: Successful operation
+        401:
+          description: Unauthorized
+        403:
+          description: Resource Forbidden
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+
+definitions:
+
+  #-----------------------------------------------------
+  # The Error Response  object
+  #-----------------------------------------------------
+  Error:
+    type: object
+    required:
+      - code
+      - message
+    properties:
+      code:
+        type: string
+        example: "some_error_code"
+      message:
+        type: string
+        example: "Some Error Message"
+      description:
+        type: string
+        example: "Some Error Description"
+      traceId:
+        type: string
+        example: "Some Correlation for Error Instance"
+  #-----------------------------------------------------
+  # The User EKYC Session response object
+  #-----------------------------------------------------
+  EKYCSession:
+    type: object
+    properties:
+      redirectUrl:
+        type: string
+        example: 'https://localhost:5443/api/test.html'
+  #-----------------------------------------------------
+  # The User Verified Credential  object
+  #-----------------------------------------------------
+  EKYCVerifiedCredential:
+    type: object
+    properties:
+      sessionId:
+        type: string
+        example: eeqweisfhkdfik
+      userId:
+        type: string
+        example: eeqweisfhkdfik
+      tenantId:
+        type: integer
+        example: 1234
+      status:
+        type: string
+        example: PENDING
+      verifiedCredential:
+        type: string
+        example: vc-example-json
+  #-----------------------------------------------------
+  # The User update Claims with Verified credential object
+  #-----------------------------------------------------
+  EKYCUpdateClaims:
+    type: object
+    properties:
+      sessionId:
+        type: string
+        example: eeqweisfhkdfikaefcqwesfceqwqas
+
+  #-----------------------------------------------------
+  # The User Verified Credential pending check request object
+  #-----------------------------------------------------
+  EKYCPendingVerifiedCredential:
+    type: object
+    properties:
+      sessionId:
+        type: string
+        example: eeqweisfhkdfikaefcqwesfceqwqas
+
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  OAuth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: https://localhost:9443/oauth2/authorize
+    tokenUrl: https://localhost:9443/oauth2/token
+# Added by API Auto Mocking Plugin
+host: localhost:9443
+basePath: /t/{tenant-domain}/api/users/v1
